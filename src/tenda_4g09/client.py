@@ -63,9 +63,9 @@ class Tenda4G09:
         return SimWanInfo.from_dict(response.json())
 
     def is_lte_connected(self) -> bool:
-        info = self.get_sim_wan_info()
+        info: SimWanInfo = self.get_sim_wan_info()
 
-        return info.get("internetStatus") == "Connected"
+        return info.internet_status == "Connected"
 
     def __enter__(self):
         self.auth.login()
