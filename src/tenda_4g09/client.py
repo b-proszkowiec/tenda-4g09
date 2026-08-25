@@ -67,6 +67,35 @@ class Tenda4G09:
 
         return info.internet_status == "Connected"
 
+    def lte_connect(self):
+        if not self.logged_in:
+            raise TendaAuthenticationError("Client is not authenticated.")
+        
+        TARGET_ACTION = 1
+        info: SimWanInfo = self.get_sim_wan_info()
+        simInfo = info.sim_info[info.profile_index]
+        data = {
+            "mobileData": info.mobile_data,
+            "dataRoaming": info.data_roaming,
+            "dataOptions": info.data_options,
+            "profileIndex": info.profile_index,
+            "pdpType": simInfo.pdp_type, 
+            "apn": simInfo.apn,
+            "simUser": simInfo.sim_user,
+            "simPwd": simInfo.sim_pwd,
+            "authType": simInfo.auth_type,
+            "action": TARGET_ACTION
+        }
+
+        response = self._session.post(
+            f"{self._base_url}/goform/setSimWanInfo",
+            data=data,
+            timeout=5,
+        )
+        response.raise_for_status()
+        return response.json()
+
+
     def __enter__(self):
         self.auth.login()
         return self
