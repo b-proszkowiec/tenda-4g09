@@ -1,0 +1,66 @@
+from __future__ import annotations
+
+import requests
+
+from .auth import Auth, Credentials
+
+
+class Tenda4G09:
+
+    def __init__(
+        self,
+        host: str,
+        username: str = "admin",
+        password: str = "",
+    ) -> None:
+        self._base_url = f"http://{host.rstrip('/')}"
+
+        self._session = requests.Session()
+
+        self.auth = Auth(
+            session=self._session,
+            base_url=self._base_url,
+            credentials=Credentials(
+                username=username,
+                password=password,
+            ),
+        )
+
+    def login(self) -> None:
+        self.auth.login()
+
+    def logout(self) -> None:
+        self.auth.logout()
+
+    @property
+    def logged_in(self) -> bool:
+        return self.auth.logged_in
+
+    def get_status(self) -> dict:
+        if not self.logged_in:
+            raise RuntimeError("Client is not authenticated.")
+
+        response = self._session.get(
+            f"{self._base_url}/goform/GetRouterStatus",
+            timeout=10,
+        )
+        response.raise_for_status()
+
+        return response.json()
+
+    def get_sim_wan_info(self) -> dict:
+        if not self.logged_in:
+            raise RuntimeError("Client is not authenticated.")
+
+        response = self._session.get(
+            f"{self._base_url}/goform/getSimWanInfo",
+            timeout=10,
+        )
+        response.raise_for_status()
+
+        return response.json()
+
+    def is_lte_connected(self) -> bool:
+        info = self.get_sim_wan_info()
+
+        return info.get("internetStatus") == "Connected"
