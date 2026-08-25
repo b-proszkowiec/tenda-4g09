@@ -4,6 +4,8 @@ import hashlib
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from .exceptions import *
+
 if TYPE_CHECKING:
     import requests
 
@@ -56,13 +58,18 @@ class Auth:
             "Origin": self._base_url,
         }
 
-        response = self._session.post(
-            url,
-            data=data,
-            headers=headers,
-            allow_redirects=False,
-            timeout=10,
-        )
+        try:
+            response = self._session.post(
+                url,
+                data=data,
+                headers=headers,
+                allow_redirects=False,
+                timeout=10,
+            )
+        except ConnectionError:
+            raise TendaConnectionError(
+                "Failed to connect to the target device."
+            )
 
         location = response.headers.get("Location", "")
         password_cookie = self._session.cookies.get("password")
@@ -75,8 +82,8 @@ class Auth:
 
         if not authenticated:
             self._logged_in = False
-            raise RuntimeError(
-                "Authentication with Tenda 4G09 failed."
+            raise TendaAuthenticationError(
+                "Authentication with target router failed."
             )
 
         self._logged_in = True

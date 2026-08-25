@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 
 from .auth import Auth, Credentials
-
+from .exceptions import *
 
 class Tenda4G09:
 
@@ -38,7 +38,7 @@ class Tenda4G09:
 
     def get_status(self) -> dict:
         if not self.logged_in:
-            raise RuntimeError("Client is not authenticated.")
+            raise TendaAuthenticationError("Client is not authenticated.")
 
         response = self._session.get(
             f"{self._base_url}/goform/GetRouterStatus",
@@ -50,7 +50,7 @@ class Tenda4G09:
 
     def get_sim_wan_info(self) -> dict:
         if not self.logged_in:
-            raise RuntimeError("Client is not authenticated.")
+            raise TendaAuthenticationError("Client is not authenticated.")
 
         response = self._session.get(
             f"{self._base_url}/goform/getSimWanInfo",
