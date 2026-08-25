@@ -64,3 +64,11 @@ class Tenda4G09:
         info = self.get_sim_wan_info()
 
         return info.get("internetStatus") == "Connected"
+
+    def __enter__(self):
+        self.auth.login()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.auth.logout()
+        return True
