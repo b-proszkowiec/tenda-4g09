@@ -4,6 +4,7 @@ import requests
 
 from .auth import Auth, Credentials
 from .models.router_status import RouterStatus
+from .models.sim_wan_info import SimWanInfo
 from .exceptions import *
 
 class Tenda4G09:
@@ -49,7 +50,7 @@ class Tenda4G09:
 
         return RouterStatus.from_dict(response.json())
 
-    def get_sim_wan_info(self) -> dict:
+    def get_sim_wan_info(self) -> SimWanInfo:
         if not self.logged_in:
             raise TendaAuthenticationError("Client is not authenticated.")
 
@@ -59,7 +60,7 @@ class Tenda4G09:
         )
         response.raise_for_status()
 
-        return response.json()
+        return SimWanInfo.from_dict(response.json())
 
     def is_lte_connected(self) -> bool:
         info = self.get_sim_wan_info()
