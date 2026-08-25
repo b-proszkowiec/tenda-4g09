@@ -3,6 +3,7 @@ from __future__ import annotations
 import requests
 
 from .auth import Auth, Credentials
+from .models.router_status import RouterStatus
 from .exceptions import *
 
 class Tenda4G09:
@@ -36,7 +37,7 @@ class Tenda4G09:
     def logged_in(self) -> bool:
         return self.auth.logged_in
 
-    def get_status(self) -> dict:
+    def get_status(self) -> RouterStatus:
         if not self.logged_in:
             raise TendaAuthenticationError("Client is not authenticated.")
 
@@ -46,7 +47,7 @@ class Tenda4G09:
         )
         response.raise_for_status()
 
-        return response.json()
+        return RouterStatus.from_dict(response.json())
 
     def get_sim_wan_info(self) -> dict:
         if not self.logged_in:
