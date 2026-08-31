@@ -62,12 +62,12 @@ class Tenda4G09:
 
         return SimWanInfo.from_dict(response.json())
 
-    def is_lte_connected(self) -> bool:
+    def is_mobile_data_connected(self) -> bool:
         info: SimWanInfo = self.get_sim_wan_info()
 
         return info.internet_status == "Connected"
 
-    def lte_connect(self):
+    def connect_mobile_data(self):
         if not self.logged_in:
             raise TendaAuthenticationError("Client is not authenticated.")
         
