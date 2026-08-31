@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import requests
+import logging
+
+from time import sleep, perf_counter
 
 from .auth import Auth, Credentials
 from .models.router_status import RouterStatus
 from .models.sim_wan_info import SimWanInfo
 from .exceptions import *
+
+
+logger = logging.getLogger(__name__)
 
 class Tenda4G09:
 
@@ -67,12 +73,31 @@ class Tenda4G09:
 
         return info.internet_status == "Connected"
 
-    def connect_mobile_data(self):
+    def connect_mobile_data(self, timeout: int = 6) -> bool:
         if not self.logged_in:
             raise TendaAuthenticationError("Client is not authenticated.")
-        
+
         TARGET_ACTION = 1
         info: SimWanInfo = self.get_sim_wan_info()
+
+        is_connected = info.internet_status == "Connected"
+        if is_connected == TARGET_ACTION:
+            logger.info("Required state is already fulfilled. Skipping.")
+            return True
+
+        start = perf_counter()
+        while(True):
+            self._send_connection_request(info, TARGET_ACTION)
+            if self.is_mobile_data_connected():
+                return True
+
+            sleep(0.5)
+            if (perf_counter() - start) >= timeout:
+                break
+
+        return False
+
+    def _send_connection_request(self, info: SimWanInfo, required_status: int):
         simInfo = info.sim_info[info.profile_index]
         data = {
             "mobileData": info.mobile_data,
@@ -84,17 +109,15 @@ class Tenda4G09:
             "simUser": simInfo.sim_user,
             "simPwd": simInfo.sim_pwd,
             "authType": simInfo.auth_type,
-            "action": TARGET_ACTION
+            "action": required_status
         }
-
         response = self._session.post(
             f"{self._base_url}/goform/setSimWanInfo",
             data=data,
-            timeout=5,
+            timeout=3,
         )
         response.raise_for_status()
         return response.json()
-
 
     def __enter__(self):
         self.auth.login()
