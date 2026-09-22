@@ -1,9 +1,13 @@
+"""Models for Tenda 4G09 router status."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class RouterStatus:
+    """Complete router status."""
+
     double_band: bool
     wl24g_enabled: bool
     wl24g_name: str
@@ -24,6 +28,8 @@ class RouterStatus:
 
     @classmethod
     def from_dict(cls, data: dict) -> RouterStatus:
+        """Create RouterStatus from router response data."""
+
         return cls(
             double_band=data["doubleBand"] == "1",
             wl24g_enabled=data["wl24gEn"] == "1",
@@ -50,6 +56,8 @@ class RouterStatus:
 
 @dataclass(frozen=True)
 class SimInfo:
+    """SIM and LTE connection information."""
+
     sim_status: str
     internet_status: str
     rssi: str
@@ -61,6 +69,8 @@ class SimInfo:
 
     @classmethod
     def from_dict(cls, data: dict) -> SimInfo:
+        """Create a SimInfo from router response data."""
+
         return cls(
             sim_status=data["simStatus"],
             internet_status=data["internetStatus"],
@@ -75,6 +85,8 @@ class SimInfo:
 
 @dataclass(frozen=True)
 class WanInfo:
+    """WAN connection information."""
+
     wan_status: str
     wan_ip: str
     wan_upload_speed: float
@@ -82,6 +94,8 @@ class WanInfo:
 
     @classmethod
     def from_dict(cls, data: dict) -> WanInfo:
+        """Create WanInfo from router response data."""
+
         return cls(
             wan_status=data["wanStatus"],
             wan_ip=data["wanIp"],

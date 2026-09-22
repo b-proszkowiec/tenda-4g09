@@ -1,7 +1,6 @@
-import logging
-from .client import Tenda4G09
+"""Tenda 4G09 router client."""
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
+from .client import Tenda4G09
 
 __all__ = [
     "Tenda4G09",

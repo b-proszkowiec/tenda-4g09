@@ -1,3 +1,5 @@
+"""Exceptions raised by the Tenda 4G09 client."""
+
 class TendaError(Exception):
     """Base exception for Tenda router errors."""
 

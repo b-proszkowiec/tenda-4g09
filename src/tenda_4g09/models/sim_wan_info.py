@@ -1,19 +1,25 @@
+"""Models for Tenda 4G09 SIM/WAN configuration."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class SimWanInfo:
+    """SIM WAN information."""
+
     internet_status: str
     mobile_data: int
     data_roaming: int
     data_options: int
     profile_index: int
-    sim_status:int
+    sim_status: int
     sim_info: list[SimInfo]
 
     @classmethod
     def from_dict(cls, data: dict) -> SimWanInfo:
+        """Create SimWanInfo from router response data."""
+
         return cls(
             internet_status=data["internetStatus"],
             mobile_data=int(data["mobileData"]),
@@ -24,12 +30,13 @@ class SimWanInfo:
             sim_info=[
                 SimInfo.from_dict(item)
                 for item in data["simInfo"]
-            ]
+            ],
         )
-
 
 @dataclass(frozen=True)
 class SimInfo:
+    """SIM profile information."""
+
     profile_name: str
     pdp_type: str
     apn: str
@@ -40,6 +47,8 @@ class SimInfo:
 
     @classmethod
     def from_dict(cls, data: dict) -> SimInfo:
+        """Create SimInfo from router response data."""
+
         return cls(
             profile_name=data["profileName"],
             pdp_type=data["pdpType"],
@@ -47,5 +56,5 @@ class SimInfo:
             sim_user=data["simUser"],
             sim_pwd=data["simPwd"],
             auth_type=data["authType"],
-            is_sys=int(data["isSys"])
+            is_sys=int(data["isSys"]),
         )

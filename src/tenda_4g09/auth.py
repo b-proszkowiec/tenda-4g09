@@ -1,30 +1,40 @@
+"""Authentication for the Tenda 4G09 router."""
+
 from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from .exceptions import *
+import requests
+
+from .exceptions import (
+    TendaAuthenticationError,
+    TendaConnectionError,
+)
 
 if TYPE_CHECKING:
-    import requests
-
+    from requests import Session
 
 @dataclass(frozen=True)
 class Credentials:
+    """Router credentials."""
 
     username: str = "admin"
     password: str = ""
 
 
 class Auth:
+    """Handle authentication with the router."""
 
     def __init__(
         self,
-        session: requests.Session,
+        session: Session,
         base_url: str,
         credentials: Credentials,
     ) -> None:
+        """Initialize authentication."""
+
         self._session = session
         self._base_url = base_url.rstrip("/")
         self._credentials = credentials
@@ -32,15 +42,20 @@ class Auth:
 
     @property
     def logged_in(self) -> bool:
+        """Return whether authentication is active."""
+
         return self._logged_in
 
     @staticmethod
     def _hash_password(password: str) -> str:
+        """Hash the password as required by the router."""
+
         return hashlib.md5(
             password.encode("utf-8")
         ).hexdigest()
 
     def login(self) -> None:
+        """Authenticate with the router."""
 
         self.logout()
 
@@ -66,10 +81,14 @@ class Auth:
                 allow_redirects=False,
                 timeout=10,
             )
-        except ConnectionError:
+        except requests.exceptions.ConnectionError as err:
             raise TendaConnectionError(
                 "Failed to connect to the target device."
-            )
+            ) from err
+        except requests.exceptions.RequestException as err:
+            raise TendaConnectionError(
+                "Failed to communicate with the target device."
+            ) from err
 
         location = response.headers.get("Location", "")
         password_cookie = self._session.cookies.get("password")
@@ -82,6 +101,7 @@ class Auth:
 
         if not authenticated:
             self._logged_in = False
+
             raise TendaAuthenticationError(
                 "Authentication with target router failed."
             )
@@ -89,6 +109,8 @@ class Auth:
         self._logged_in = True
 
     def logout(self) -> None:
+        """Log out from the router."""
+
         if not self._logged_in:
             return
 
