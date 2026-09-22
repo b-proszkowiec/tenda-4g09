@@ -3,7 +3,7 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tenda-4g09"
+name = "tenda-4g09-client"
 version = "0.1.0"
 description = "Python client library for Tenda 4G09 LTE router"
 readme = "README.md"
