@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tenda-4g09"
+version = "0.1.0"
+description = "Python client library for Tenda 4G09 LTE router"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+{name = "b-proszkowiec"}
+]
+keywords = [
+"tenda",
+"4g09",
+"lte",
+"router",
+"network",
+"home-assistant"
+]
+classifiers = [
+"Development Status :: 3 - Alpha",
+"Intended Audience :: Developers",
+"License :: OSI Approved :: MIT License",
+"Programming Language :: Python :: 3",
+"Programming Language :: Python :: 3 :: Only",
+"Programming Language :: Python :: 3.10",
+"Programming Language :: Python :: 3.11",
+"Programming Language :: Python :: 3.12",
+"Programming Language :: Python :: 3.13",
+"Topic :: Home Automation",
+"Topic :: Internet",
+"Topic :: System :: Networking",
+]
+
+dependencies = [
+"requests>=2.31.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/b-proszkowiec/tenda-4g09"
+Repository = "https://github.com/b-proszkowiec/tenda-4g09"
+Issues = "https://github.com/b-proszkowiec/tenda-4g09/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
