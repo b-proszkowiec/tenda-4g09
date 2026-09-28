@@ -1,28 +1,39 @@
-"""Client for communicating with a Tenda 4G09 router."""
+"""Client for Tenda 4G09 router."""
 
 from __future__ import annotations
+
+from typing import Any
 
 import requests
 
 from .auth import Auth, Credentials
-from .exceptions import TendaAuthenticationError
-from .models.router_status import RouterStatus
-from .models.sim_wan import SimWanInfo
+from .models import (
+    OnlineClient,
+    RouterStatus,
+    SimMessage,
+    SimWanInfo,
+    SystemLog,
+    SystemStatus,
+)
+
 
 class Tenda4G09:
-    """Client for the Tenda 4G09 router."""
+    """Client for Tenda 4G09 router."""
 
     def __init__(
         self,
-        host: str,
+        host: str,        
+        password: str,
         username: str = "admin",
-        password: str = "",
     ) -> None:
         """Initialize the client."""
 
-        self._base_url = f"http://{host.rstrip('/')}"
-
+        self.host = host.rstrip("/")
         self._session = requests.Session()
+        self._base_url = f"http://{host.rstrip('/')}"
+        self.username = username
+        self.password = password
+        
 
         self.auth = Auth(
             session=self._session,
@@ -49,79 +60,116 @@ class Tenda4G09:
 
         return self.auth.logged_in
 
-    def get_status(self) -> RouterStatus:
-        """Get the current router status."""
+
+    def _request(
+        self,
+        method: str,
+        path: str,
+        **kwargs: Any,
+    ) -> Any:
+        """Send a request to the router."""
 
         if not self.logged_in:
-            raise TendaAuthenticationError(
-                "Client is not authenticated."
-            )
+            self.login()
 
-        response = self._session.get(
-            f"{self._base_url}/goform/GetRouterStatus",
+        response = self._session.request(
+            method,
+            f"http://{self.host}{path}",
             timeout=10,
-        )
-        response.raise_for_status()
-
-        return RouterStatus.from_dict(response.json())
-
-    def get_sim_wan_info(self) -> SimWanInfo:
-        """Get SIM/WAN information."""
-
-        if not self.logged_in:
-            raise TendaAuthenticationError(
-                "Client is not authenticated."
-            )
-
-        response = self._session.get(
-            f"{self._base_url}/goform/getSimWanInfo",
-            timeout=10,
-        )
-        response.raise_for_status()
-
-        return SimWanInfo.from_dict(response.json())
-
-    def is_lte_connected(self) -> bool:
-        """Return whether LTE WAN is connected."""
-
-        info = self.get_sim_wan_info()
-
-        return info.internet_status == "Connected"
-
-    def lte_connect(self) -> dict:
-        """Reconnect the LTE WAN connection."""
-
-        if not self.logged_in:
-            raise TendaAuthenticationError(
-                "Client is not authenticated."
-            )
-
-        target_action = 1
-
-        info = self.get_sim_wan_info()
-        sim_info = info.sim_info[info.profile_index]
-
-        data = {
-            "mobileData": info.mobile_data,
-            "dataRoaming": info.data_roaming,
-            "dataOptions": info.data_options,
-            "profileIndex": info.profile_index,
-            "pdpType": sim_info.pdp_type,
-            "apn": sim_info.apn,
-            "simUser": sim_info.sim_user,
-            "simPwd": sim_info.sim_pwd,
-            "authType": sim_info.auth_type,
-            "action": target_action,
-        }
-
-        response = self._session.post(
-            f"{self._base_url}/goform/setSimWanInfo",
-            data=data,
-            timeout=5,
+            **kwargs,
         )
         response.raise_for_status()
 
         return response.json()
+
+    def get_status(self) -> RouterStatus:
+        """Get router status."""
+
+        data = self._request(
+            "GET",
+            "/goform/GetRouterStatus",
+        )
+
+        return RouterStatus.from_dict(data)
+
+    def get_sim_wan_info(self) -> SimWanInfo:
+        """Get SIM WAN configuration."""
+
+        data = self._request(
+            "GET",
+            "/goform/getSimWanInfo",
+        )
+
+        return SimWanInfo.from_dict(data)
+
+    def get_system_status(self) -> SystemStatus:
+        """Get detailed system status."""
+
+        data = self._request(
+            "GET",
+            "/goform/GetSystemStatus",
+        )
+
+        return SystemStatus.from_dict(data)
+
+    def get_online_clients(self) -> list[OnlineClient]:
+        """Get currently connected clients."""
+
+        data = self._request(
+            "GET",
+            "/goform/getOnlineList",
+        )
+
+        return [
+            OnlineClient.from_dict(item)
+            for item in data
+            if "deviceId" in item
+        ]
+
+    def get_sim_messages(self) -> list[SimMessage]:
+        """Get SIM messages."""
+
+        data = self._request(
+            "GET",
+            "/goform/getSimList",
+        )
+
+        return [
+            SimMessage.from_dict(item)
+            for item in data
+            if "index" in item
+        ]
+
+    def get_system_logs(self) -> list[SystemLog]:
+        """Get system logs."""
+
+        data = self._request(
+            "GET",
+            "/goform/GetSySLogCfg",
+        )
+
+        return [
+            SystemLog.from_dict(item)
+            for item in data
+        ]
+
+    def is_lte_connected(self) -> bool:
+        """Return whether LTE/WAN is connected."""
+
+        status = self.get_status()
+
+        return status.sim_info.internet_status == 1
+
+    def lte_connect(self) -> None:
+        """Reconnect the LTE/WAN connection."""
+
+        self._request(
+            "POST",
+            "/goform/setSimWanInfo",
+            data={
+                "action": "1",
+            },
+        )
 
     def __enter__(self) -> Tenda4G09:
         """Log in when entering a context manager."""
