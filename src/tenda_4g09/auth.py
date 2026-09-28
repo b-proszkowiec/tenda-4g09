@@ -54,10 +54,8 @@ class Auth:
             password.encode("utf-8")
         ).hexdigest()
 
-    def login(self) -> None:
+    def login(self, repeated=False) -> None:
         """Authenticate with the router."""
-
-        self.logout()
 
         url = f"{self._base_url}/login/Auth"
 
@@ -92,6 +90,10 @@ class Auth:
 
         location = response.headers.get("Location", "")
         password_cookie = self._session.cookies.get("password")
+
+        if response.status_code == 302 and location == f"{self._base_url}/login.html"and password_cookie is None and not repeated:
+            return self.login(True)
+
 
         authenticated = (
             response.status_code == 302
