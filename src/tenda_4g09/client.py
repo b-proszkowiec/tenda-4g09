@@ -7,7 +7,7 @@ import requests
 from .auth import Auth, Credentials
 from .exceptions import TendaAuthenticationError
 from .models.router_status import RouterStatus
-from .models.sim_wan_info import SimWanInfo
+from .models.sim_wan import SimWanInfo
 
 class Tenda4G09:
     """Client for the Tenda 4G09 router."""

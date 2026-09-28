@@ -4,101 +4,127 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+
+@dataclass(frozen=True)
+class RouterWanInfo:
+    """WAN information from router status."""
+
+    status: str
+    ip: str
+    upload_speed: float
+    download_speed: float
+
+    @classmethod
+    def from_dict(cls, data: dict) -> RouterWanInfo:
+        """Create WAN information from router response."""
+
+        return cls(
+            status=data["wanStatus"],
+            ip=data["wanIp"],
+            upload_speed=float(data["wanUploadSpeed"]),
+            download_speed=float(data["wanDownloadSpeed"]),
+        )
+
+
+@dataclass(frozen=True)
+class RouterSimInfo:
+    """Current cellular connection information."""
+
+    sim_status: int
+    internet_status: int
+    rssi: int
+    connection_type: str
+    upload_speed: float
+    download_speed: float
+    wan_ip: str
+    limit_data: int
+
+    @classmethod
+    def from_dict(cls, data: dict) -> RouterSimInfo:
+        """Create SIM information from router response."""
+
+        return cls(
+            sim_status=int(data["simStatus"]),
+            internet_status=int(data["internetStatus"]),
+            rssi=int(data["rssi"]),
+            connection_type=data["connectionType"],
+            upload_speed=float(data["uploadSpeed"]),
+            download_speed=float(data["downloadSpeed"]),
+            wan_ip=data["wanIp"],
+            limit_data=int(data["limitData"]),
+        )
+
+
+@dataclass(frozen=True)
+class OnlineUpgradeInfo:
+    """Firmware upgrade information."""
+
+    new_version_exists: bool
+    new_version: str
+    current_version: str
+
+    @classmethod
+    def from_dict(cls, data: dict) -> OnlineUpgradeInfo:
+        """Create upgrade information from router response."""
+
+        return cls(
+            new_version_exists=data["newVersionExist"] == "1",
+            new_version=data["newVersion"],
+            current_version=data["curVersion"],
+        )
+
+
 @dataclass(frozen=True)
 class RouterStatus:
-    """Complete router status."""
+    """Current router status."""
 
     double_band: bool
-    wl24g_enabled: bool
-    wl24g_name: str
-    wl5g_enabled: bool
-    wl5g_name: str
+    wifi_24g_enabled: bool
+    wifi_24g_name: str
+    wifi_5g_enabled: bool
+    wifi_5g_name: str
     lineup: str
-    client_num: int
-    black_num: int
-    list_num: int
+    client_count: int
+    black_count: int
+    list_count: int
     device_name: str
     lan_ip: str
     lan_mac: str
     work_mode: str
     ap_status: str
-    wan_info: list[WanInfo]
+    wan_info: list[RouterWanInfo]
     country_code: str
-    sim_info: SimInfo
+    online_upgrade: OnlineUpgradeInfo
+    sim_info: RouterSimInfo
 
     @classmethod
     def from_dict(cls, data: dict) -> RouterStatus:
-        """Create RouterStatus from router response data."""
+        """Create router status from router response."""
 
         return cls(
             double_band=data["doubleBand"] == "1",
-            wl24g_enabled=data["wl24gEn"] == "1",
-            wl24g_name=data["wl24gName"],
-            wl5g_enabled=data["wl5gEn"] == "1",
-            wl5g_name=data["wl5gName"],
+            wifi_24g_enabled=data["wl24gEn"] == "1",
+            wifi_24g_name=data["wl24gName"],
+            wifi_5g_enabled=data["wl5gEn"] == "1",
+            wifi_5g_name=data["wl5gName"],
             lineup=data["lineup"],
-            client_num=int(data["clientNum"]),
-            black_num=int(data["blackNum"]),
-            list_num=int(data["listNum"]),
+            client_count=int(data["clientNum"]),
+            black_count=int(data["blackNum"]),
+            list_count=int(data["listNum"]),
             device_name=data["deviceName"],
             lan_ip=data["lanIP"],
             lan_mac=data["lanMAC"],
             work_mode=data["workMode"],
             ap_status=data["apStatus"],
             wan_info=[
-                WanInfo.from_dict(item)
+                RouterWanInfo.from_dict(item)
                 for item in data["wanInfo"]
             ],
             country_code=data["countryCode"],
-            sim_info=SimInfo.from_dict(data["simInfo"]),
-        )
-
-
-@dataclass(frozen=True)
-class SimInfo:
-    """SIM and LTE connection information."""
-
-    sim_status: str
-    internet_status: str
-    rssi: str
-    connection_type: str
-    upload_speed: float
-    download_speed: float
-    wan_ip: str
-    limit_data: str
-
-    @classmethod
-    def from_dict(cls, data: dict) -> SimInfo:
-        """Create a SimInfo from router response data."""
-
-        return cls(
-            sim_status=data["simStatus"],
-            internet_status=data["internetStatus"],
-            rssi=data["rssi"],
-            connection_type=data["connectionType"],
-            upload_speed=float(data["uploadSpeed"]),
-            download_speed=float(data["downloadSpeed"]),
-            wan_ip=data["wanIp"],
-            limit_data=data["limitData"],
-        )
-
-
-@dataclass(frozen=True)
-class WanInfo:
-    """WAN connection information."""
-
-    wan_status: str
-    wan_ip: str
-    wan_upload_speed: float
-    wan_download_speed: float
-
-    @classmethod
-    def from_dict(cls, data: dict) -> WanInfo:
-        """Create WanInfo from router response data."""
-
-        return cls(
-            wan_status=data["wanStatus"],
-            wan_ip=data["wanIp"],
-            wan_upload_speed=float(data["wanUploadSpeed"]),
-            wan_download_speed=float(data["wanDownloadSpeed"]),
+            online_upgrade=OnlineUpgradeInfo.from_dict(
+                data["onlineUpgradeInfo"]
+            ),
+            sim_info=RouterSimInfo.from_dict(
+                data["simInfo"]
+            ),
         )
