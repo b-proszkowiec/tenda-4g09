@@ -153,15 +153,16 @@ class Tenda4G09:
             for item in data
         ]
 
-    def is_lte_connected(self) -> bool:
-        """Return whether LTE/WAN is connected."""
+    def is_mobile_data_connected(self, status: RouterStatus | None = None) -> bool:
+        """Whether the mobile WAN connection is active."""
 
-        status = self.get_status()
+        if status is None:
+            status = self.get_status()
 
         return status.sim_info.internet_status == 1
 
-    def lte_connect(self) -> None:
-        """Reconnect the LTE/WAN connection."""
+    def mobile_data_connect(self) -> None:
+        """Reconnect the mobile WAN connection."""
 
         self._request(
             "POST",
