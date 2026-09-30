@@ -12,6 +12,7 @@ from .models import (
     RouterStatus,
     SimMessage,
     SimWanInfo,
+    SimProfile,
     SystemLog,
     SystemStatus,
 )
@@ -164,12 +165,42 @@ class Tenda4G09:
     def mobile_data_connect(self) -> None:
         """Reconnect the mobile WAN connection."""
 
+        self._set_mobile_data_connection(1)
+
+    def mobile_data_disconnect(self) -> None:
+        """Disconnect the mobile WAN connection."""
+
+        self._set_mobile_data_connection(0)
+
+    def _set_mobile_data_connection(self, action: int) -> None:
+        """Sets the mobile WAN connection to the desired state.
+
+        Args:
+            action: 0 to connect, 1 to disconnect.
+        """
+
+        if action not in (0, 1):
+            raise ValueError("action must be 0 (connect) or 1 (disconnect)")
+
+        swi: SimWanInfo = self.get_sim_wan_info()
+        active_index: int = swi.profile_index
+        sp: SimProfile = swi.profiles[active_index]
+
         self._request(
             "POST",
             "/goform/setSimWanInfo",
-            data={
-                "action": "1",
-            },
+            data = { 
+                "mobileData": int(swi.mobile_data),
+                "dataRoaming": int(swi.data_roaming), 
+                "dataOptions": swi.data_options, 
+                "profileIndex": swi.profile_index, 
+                "pdpType": sp.pdp_type, 
+                "apn": sp.apn, 
+                "simUser": sp.username, 
+                "simPwd": sp.password, 
+                "authType": sp.auth_type, 
+                "action": action, 
+            }
         )
 
     def __enter__(self) -> Tenda4G09:
