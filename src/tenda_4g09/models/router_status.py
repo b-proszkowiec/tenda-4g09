@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..enums.signal import SignalQuality
+from ..enums import SignalQuality
 
 @dataclass(frozen=True)
 class RouterWanInfo:

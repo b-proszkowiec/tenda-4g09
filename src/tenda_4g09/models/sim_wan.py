@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..enums import SimStatus
 
 @dataclass(frozen=True)
 class SimProfile:
@@ -41,7 +42,7 @@ class SimWanInfo:
     data_roaming: bool
     data_options: int
     profile_index: int
-    sim_status: int
+    sim_status: SimStatus
     profiles: list[SimProfile]
 
     @classmethod
@@ -54,7 +55,7 @@ class SimWanInfo:
             data_roaming=data["dataRoaming"] == "1",
             data_options=int(data["dataOptions"]),
             profile_index=int(data["profileIndex"]),
-            sim_status=int(data["simStatus"]),
+            sim_status=SimStatus(int(data["simStatus"])),
             profiles=[
                 SimProfile.from_dict(item)
                 for item in data["simInfo"]
