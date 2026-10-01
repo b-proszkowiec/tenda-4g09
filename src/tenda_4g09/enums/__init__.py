@@ -1,8 +1,10 @@
 from .signal import SignalQuality
-from .sim_status import SimStatus
+from .status import SimStatus, ConnectionState, EnableState
 
 
 __all__ = [
     "SignalQuality",
     "SimStatus",
+    "ConnectionState",
+    "EnableState"
 ]

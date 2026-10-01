@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..enums import SimStatus
+from ..enums import *
 
 @dataclass(frozen=True)
 class SimProfile:
@@ -40,7 +40,7 @@ class SimWanInfo:
     internet_status: str
     mobile_data: bool
     data_roaming: bool
-    data_options: int
+    data_options: EnableState
     profile_index: int
     sim_status: SimStatus
     profiles: list[SimProfile]
@@ -53,7 +53,7 @@ class SimWanInfo:
             internet_status=data["internetStatus"],
             mobile_data=data["mobileData"] == "1",
             data_roaming=data["dataRoaming"] == "1",
-            data_options=int(data["dataOptions"]),
+            data_options=EnableState(int(data["dataOptions"])),
             profile_index=int(data["profileIndex"]),
             sim_status=SimStatus(int(data["simStatus"])),
             profiles=[

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..enums import SignalQuality
+from ..enums import *
 
 @dataclass(frozen=True)
 class RouterWanInfo:
@@ -31,8 +31,8 @@ class RouterWanInfo:
 class RouterSimInfo:
     """Current cellular connection information."""
 
-    sim_status: int
-    internet_status: int
+    sim_status: SimStatus
+    internet_status: ConnectionState
     rssi: SignalQuality
     connection_type: str
     upload_speed: float
@@ -45,8 +45,8 @@ class RouterSimInfo:
         """Create SIM information from router response."""
 
         return cls(
-            sim_status=int(data["simStatus"]),
-            internet_status=int(data["internetStatus"]),
+            sim_status=SimStatus(int(data["simStatus"])),
+            internet_status=ConnectionState(int(data["internetStatus"])),
             rssi=SignalQuality(int(data["rssi"])),
             connection_type=data["connectionType"],
             upload_speed=float(data["uploadSpeed"]),

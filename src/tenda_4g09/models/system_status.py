@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..enums import SignalQuality, SimStatus
+from ..enums import *
 
 @dataclass(frozen=True)
 class SystemWanInfo:
@@ -46,7 +46,7 @@ class SystemSimInfo:
     """Detailed cellular connection information."""
 
     sim_status: SimStatus
-    connection_status: int
+    connection_status: ConnectionState
     signal_strength: SignalQuality
     carrier: str
     mobile_network: str
@@ -66,7 +66,7 @@ class SystemSimInfo:
 
         return cls(
             sim_status=SimStatus(int(data["adv_sim_status"])),
-            connection_status=int(data["adv_sim_connsta"]),
+            connection_status=ConnectionState(int(data["adv_sim_connsta"])),
             signal_strength=SignalQuality(int(data["adv_signal_strength"])),
             carrier=data["adv_carrier"],
             mobile_network=data["adv_mob_net"],

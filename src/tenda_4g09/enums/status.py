@@ -17,3 +17,13 @@ class SimStatus(IntEnum):
 
     def __str__(self) -> str:
         return self.description
+
+
+class ConnectionState(IntEnum):
+    DISCONNECTED = 0
+    CONNECTED = 1
+
+
+class EnableState(IntEnum):
+    DISABLED = 0
+    ENABLED = 1
