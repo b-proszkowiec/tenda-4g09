@@ -16,6 +16,7 @@ from .models import (
     SimProfile,
     SystemLog,
     SystemStatus,
+    DataLimitSetting
 )
 
 
@@ -154,6 +155,16 @@ class Tenda4G09:
             SystemLog.from_dict(item)
             for item in data
         ]
+
+    def get_data_limit_setting(self) -> DataLimitSetting:
+        """Get current data limit setting."""
+
+        data = self._request(
+            "GET",
+            "/goform/getDataLimitSetting",
+        )
+
+        return DataLimitSetting.from_dict(data)
 
     def is_mobile_data_connected(self, status: RouterStatus | None = None) -> bool:
         """Whether the mobile WAN connection is active."""
