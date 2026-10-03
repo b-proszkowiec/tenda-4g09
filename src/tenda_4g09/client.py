@@ -6,6 +6,7 @@ from typing import Any
 
 import requests
 
+from .enums import ConnectionState
 from .auth import Auth, Credentials
 from .models import (
     OnlineClient,
@@ -165,22 +166,19 @@ class Tenda4G09:
     def mobile_data_connect(self) -> None:
         """Reconnect the mobile WAN connection."""
 
-        self._set_mobile_data_connection(1)
+        self._set_mobile_data_connection(ConnectionState.CONNECTED)
 
     def mobile_data_disconnect(self) -> None:
         """Disconnect the mobile WAN connection."""
 
-        self._set_mobile_data_connection(0)
+        self._set_mobile_data_connection(ConnectionState.DISCONNECTED)
 
-    def _set_mobile_data_connection(self, action: int) -> None:
+    def _set_mobile_data_connection(self, action: ConnectionState) -> None:
         """Sets the mobile WAN connection to the desired state.
 
         Args:
-            action: 0 to connect, 1 to disconnect.
+            action: 0 to disconnect, 1 to connect.
         """
-
-        if action not in (0, 1):
-            raise ValueError("action must be 0 (connect) or 1 (disconnect)")
 
         swi: SimWanInfo = self.get_sim_wan_info()
         active_index: int = swi.profile_index
@@ -191,15 +189,15 @@ class Tenda4G09:
             "/goform/setSimWanInfo",
             data = { 
                 "mobileData": int(swi.mobile_data),
-                "dataRoaming": int(swi.data_roaming), 
-                "dataOptions": swi.data_options, 
-                "profileIndex": swi.profile_index, 
-                "pdpType": sp.pdp_type, 
-                "apn": sp.apn, 
-                "simUser": sp.username, 
-                "simPwd": sp.password, 
-                "authType": sp.auth_type, 
-                "action": action, 
+                "dataRoaming": int(swi.data_roaming),
+                "dataOptions": swi.data_options,
+                "profileIndex": swi.profile_index,
+                "pdpType": sp.pdp_type,
+                "apn": sp.apn,
+                "simUser": sp.username,
+                "simPwd": sp.password,
+                "authType": sp.auth_type,
+                "action": action.value
             }
         )
 
