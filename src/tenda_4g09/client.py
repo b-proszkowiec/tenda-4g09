@@ -16,8 +16,10 @@ from .models import (
     SimProfile,
     SystemLog,
     SystemStatus,
-    DataLimitSetting
+    DataLimitSetting,
+    LTEServingCell
 )
+from .telnet import run_telnet
 
 
 class Tenda4G09:
@@ -165,6 +167,27 @@ class Tenda4G09:
         )
 
         return DataLimitSetting.from_dict(data)
+
+    def enable_telnet(self):
+        url = f"http://{self.host}/goform/telnet"
+
+        try:
+            response = self._session.get(
+                url,
+                timeout=5,
+            )
+            return response.text
+
+        except requests.exceptions.ConnectionError as exc:
+            if "BadStatusLine" in str(exc) and "load telnetd success." in str(exc):
+                return "load telnetd success."
+            raise
+
+    def get_signal_parameters(self) -> LTEServingCell:
+        self.enable_telnet()
+        sc = run_telnet('AT+QENG="servingcell"', self.host)
+        serving_cell = LTEServingCell.from_qeng(sc)
+        return serving_cell
 
     def enable_telnet(self):
         url = f"http://{self.host}/goform/telnet"

@@ -6,10 +6,14 @@ from .models import *
 from .models import __all__ as _models_all
 from .enums import *
 from .enums import __all__ as _enums_all
+from .telnet import *
+from .telnet import __all__ as _telnet_all
+
 
 __all__ = [
     "Tenda4G09",
     "Auth",
     *_models_all,
     *_enums_all,
+    *_telnet_all,
 ]
