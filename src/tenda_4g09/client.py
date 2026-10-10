@@ -166,6 +166,21 @@ class Tenda4G09:
 
         return DataLimitSetting.from_dict(data)
 
+    def enable_telnet(self):
+        url = f"http://{self.host}/goform/telnet"
+
+        try:
+            response = self._session.get(
+                url,
+                timeout=5,
+            )
+            return response.text
+
+        except requests.exceptions.ConnectionError as exc:
+            if "BadStatusLine" in str(exc) and "load telnetd success." in str(exc):
+                return "load telnetd success."
+            raise
+
     def is_mobile_data_connected(self, status: RouterStatus | None = None) -> bool:
         """Whether the mobile WAN connection is active."""
 
@@ -201,7 +216,7 @@ class Tenda4G09:
             data = { 
                 "mobileData": int(swi.mobile_data),
                 "dataRoaming": int(swi.data_roaming),
-                "dataOptions": swi.data_options,
+                "dataOptions": swi.data_options.value,
                 "profileIndex": swi.profile_index,
                 "pdpType": sp.pdp_type,
                 "apn": sp.apn,
