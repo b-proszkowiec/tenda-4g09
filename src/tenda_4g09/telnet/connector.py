@@ -6,7 +6,7 @@ from .response_parser import extract_response
 DEFAULT_LOGIN = "root"
 DEFAULT_PASSWD = "Fireitup"
 
-def run_telnet(cmd: str, host: str, port: int = 23):
+def run_telnet_cmd(cmd: str, host: str, port: int = 23):
     result = asyncio.run(
         execute_telnet(
             host=host,

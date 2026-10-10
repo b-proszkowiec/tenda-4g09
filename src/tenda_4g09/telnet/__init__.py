@@ -1,5 +1,5 @@
-from .connector import run_telnet
+from .telnet_client import TelnetClient
 
 __all__ = [
-    "run_telnet",
+    "TelnetClient"
 ]

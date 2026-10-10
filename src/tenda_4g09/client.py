@@ -16,10 +16,9 @@ from .models import (
     SimProfile,
     SystemLog,
     SystemStatus,
-    DataLimitSetting,
-    LTEServingCell
+    DataLimitSetting
 )
-from .telnet import run_telnet
+from .telnet import TelnetClient
 
 
 class Tenda4G09:
@@ -39,6 +38,7 @@ class Tenda4G09:
         self.username = username
         self.password = password
         
+        self._telnet_client: TelnetClient | None = None
 
         self.auth = Auth(
             session=self._session,
@@ -65,6 +65,11 @@ class Tenda4G09:
 
         return self.auth.logged_in
 
+    def get_telnet_client(self, ip: str, port:int = 23) -> TelnetClient:
+        if self._telnet_client is None:
+            self._telnet_client = TelnetClient(ip, port, self.enable_telnet)
+        
+        return self._telnet_client
 
     def _request(
         self,
@@ -168,41 +173,21 @@ class Tenda4G09:
 
         return DataLimitSetting.from_dict(data)
 
-    def enable_telnet(self):
+    def enable_telnet(self) -> bool:
         url = f"http://{self.host}/goform/telnet"
+        message = ""
 
         try:
             response = self._session.get(
                 url,
                 timeout=5,
             )
-            return response.text
+            message = response.text
 
         except requests.exceptions.ConnectionError as exc:
-            if "BadStatusLine" in str(exc) and "load telnetd success." in str(exc):
-                return "load telnetd success."
-            raise
+            message = str(exc)
 
-    def get_signal_parameters(self) -> LTEServingCell:
-        self.enable_telnet()
-        sc = run_telnet('AT+QENG="servingcell"', self.host)
-        serving_cell = LTEServingCell.from_qeng(sc)
-        return serving_cell
-
-    def enable_telnet(self):
-        url = f"http://{self.host}/goform/telnet"
-
-        try:
-            response = self._session.get(
-                url,
-                timeout=5,
-            )
-            return response.text
-
-        except requests.exceptions.ConnectionError as exc:
-            if "BadStatusLine" in str(exc) and "load telnetd success." in str(exc):
-                return "load telnetd success."
-            raise
+        return "load telnetd success." in message
 
     def is_mobile_data_connected(self, status: RouterStatus | None = None) -> bool:
         """Whether the mobile WAN connection is active."""
