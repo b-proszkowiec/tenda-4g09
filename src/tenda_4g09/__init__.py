@@ -8,7 +8,8 @@ from .enums import *
 from .enums import __all__ as _enums_all
 from .telnet import *
 from .telnet import __all__ as _telnet_all
-
+from .enrichment import *
+from .enrichment import __all__ as _enrichment_all
 
 __all__ = [
     "Tenda4G09",
@@ -16,4 +17,5 @@ __all__ = [
     *_models_all,
     *_enums_all,
     *_telnet_all,
+    *_enrichment_all,
 ]
