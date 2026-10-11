@@ -10,13 +10,13 @@ class LTEServingCell:
     duplex: str
     mcc: str
     mnc: str
-    cell_id: str
+    cell_id: int
     pci: int
     earfcn: int
     band: int
     ul_bandwidth: int
     dl_bandwidth: int
-    tac: str
+    tac: int
     rsrp: int
     rsrq: int
     rssi: int
@@ -53,13 +53,13 @@ class LTEServingCell:
             duplex=fields[2],
             mcc=fields[3],
             mnc=fields[4],
-            cell_id=fields[5],
+            cell_id=int(fields[5],16),
             pci=int(fields[6]),
             earfcn=int(fields[7]),
             band=int(fields[8]),
             ul_bandwidth=int(fields[9]),
             dl_bandwidth=int(fields[10]),
-            tac=fields[11],
+            tac=int(fields[11],16),
             rsrp=int(fields[12]),
             rsrq=int(fields[13]),
             rssi=int(fields[14]),
@@ -70,11 +70,11 @@ class LTEServingCell:
         )
 
     @property
-    def cell_id_decimal(self) -> int:
+    def cell_id_hex(self) -> str:
         """Cell ID provided in hexadecimal format"""
-        return int(self.cell_id, 16)
+        return hex(self.cell_id)
 
     @property
-    def tac_decimal(self) -> int:
+    def tac_hex(self) -> str:
         """TAC provided in hexadecimal format"""
-        return int(self.tac, 16)
+        return hex(self.tac)
