@@ -26,6 +26,7 @@ class TelnetClient:
 
     @requires_connection
     def get_signal_info(self) -> LTEServingCell:
+        """Get LTE serving cell information."""
 
         sc_rsp = run_telnet_cmd('AT+QENG="servingcell"', self.ip, self.port)
         serving_cell = LTEServingCell.from_qeng(sc_rsp)

@@ -26,15 +26,15 @@ class Tenda4G09:
 
     def __init__(
         self,
-        host: str,        
+        host_address: str,        
         password: str,
         username: str = "admin",
     ) -> None:
         """Initialize the client."""
 
-        self.host = host.rstrip("/")
+        self._host_ip = None
         self._session = requests.Session()
-        self._base_url = f"http://{host.rstrip('/')}"
+        self._base_url = f"http://{host_address.rstrip('/')}"
         self.username = username
         self.password = password
         
@@ -52,6 +52,7 @@ class Tenda4G09:
     def login(self) -> None:
         """Authenticate with the router."""
 
+        self.reset_stored()
         self.auth.login()
 
     def logout(self) -> None:
@@ -59,13 +60,27 @@ class Tenda4G09:
 
         self.auth.logout()
 
+    def reset_stored(self):
+        self._host_ip = None
+        self._telnet_client = None
+
+    @property
+    def host_ip(self) -> str:
+        """Return the target router ip."""
+
+        if self._host_ip is None:
+            self._host_ip = self.get_status().lan_ip
+        
+        return self._host_ip
+        
     @property
     def logged_in(self) -> bool:
         """Return whether the client is authenticated."""
 
         return self.auth.logged_in
 
-    def get_telnet_client(self, ip: str, port:int = 23) -> TelnetClient:
+    def get_telnet_client(self, ip: str, port: int = 23) -> TelnetClient:
+
         if self._telnet_client is None:
             self._telnet_client = TelnetClient(ip, port, self.enable_telnet)
         
@@ -84,7 +99,7 @@ class Tenda4G09:
 
         response = self._session.request(
             method,
-            f"http://{self.host}{path}",
+            f"{self._base_url}{path}",
             timeout=10,
             **kwargs,
         )
@@ -174,7 +189,7 @@ class Tenda4G09:
         return DataLimitSetting.from_dict(data)
 
     def enable_telnet(self) -> bool:
-        url = f"http://{self.host}/goform/telnet"
+        url = f"{self._base_url}/goform/telnet"
         message = ""
 
         try:
