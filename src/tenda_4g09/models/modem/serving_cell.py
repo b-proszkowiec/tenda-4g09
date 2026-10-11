@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import re
 
+from .bandwidth import get_bandwidth
 
 @dataclass
 class LTEServingCell:
@@ -14,8 +15,8 @@ class LTEServingCell:
     pci: int
     earfcn: int
     band: int
-    ul_bandwidth: int
-    dl_bandwidth: int
+    ul_bandwidth: float
+    dl_bandwidth: float
     tac: int
     rsrp: int
     rsrq: int
@@ -57,8 +58,8 @@ class LTEServingCell:
             pci=int(fields[6]),
             earfcn=int(fields[7]),
             band=int(fields[8]),
-            ul_bandwidth=int(fields[9]),
-            dl_bandwidth=int(fields[10]),
+            ul_bandwidth=get_bandwidth(int(fields[9])),
+            dl_bandwidth=get_bandwidth(int(fields[10])),
             tac=int(fields[11],16),
             rsrp=int(fields[12]),
             rsrq=int(fields[13]),
