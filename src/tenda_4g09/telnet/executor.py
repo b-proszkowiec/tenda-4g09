@@ -40,7 +40,7 @@ async def execute_telnet(
             writer.write(f"microcom -s {SPEED} {DEVICE}\n")
             await writer.drain()
 
-            await asyncio.sleep(0.3)
+            await asyncio.sleep(0.4)
 
             writer.write(command + "\r")
             await writer.drain()
@@ -106,7 +106,7 @@ async def execute_telnet(
             finally:
                 writer.write("\x18")
                 await writer.drain()
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(0.4)
 
             return "\n".join(response_lines).strip()
 
@@ -127,7 +127,7 @@ async def execute_telnet(
 
         separator = b"~ #"
         try:
-            data = await asyncio.wait_for(
+            await asyncio.wait_for(
                 reader.readuntil(separator),
                 timeout=timeout,
             )
