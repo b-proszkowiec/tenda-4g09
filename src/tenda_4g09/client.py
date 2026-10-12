@@ -114,8 +114,9 @@ class Tenda4G09:
             "GET",
             "/goform/GetRouterStatus",
         )
-
-        return RouterStatus.from_dict(data)
+        status = RouterStatus.from_dict(data)
+        self._host_ip = status.lan_ip
+        return status
 
     def get_sim_wan_info(self) -> SimWanInfo:
         """Get SIM WAN configuration."""
@@ -195,7 +196,7 @@ class Tenda4G09:
         try:
             response = self._session.get(
                 url,
-                timeout=5,
+                timeout=3,
             )
             message = response.text
 
