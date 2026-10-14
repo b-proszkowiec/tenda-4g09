@@ -189,6 +189,17 @@ class Tenda4G09:
 
         self._set_mobile_data_connection(ConnectionState.DISCONNECTED)
 
+    def system_reboot(self) -> None:
+        """Reboots the router."""
+
+        response = self._session.request(
+            "POST",
+            f"{self._base_url}/goform/SysToolReboot",
+            data = {"action": 0},
+            timeout=4
+        )
+        response.raise_for_status()
+
     def _set_mobile_data_connection(self, action: ConnectionState) -> None:
         """Sets the mobile WAN connection to the desired state.
 
