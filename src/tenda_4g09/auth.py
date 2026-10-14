@@ -46,6 +46,9 @@ class Auth:
 
         return self._logged_in
 
+    def logged_out(self):
+        self._logged_in = False
+
     @staticmethod
     def _hash_password(password: str) -> str:
         """Hash the password as required by the router."""
@@ -77,7 +80,7 @@ class Auth:
                 data=data,
                 headers=headers,
                 allow_redirects=False,
-                timeout=10,
+                timeout=4,
             )
         except requests.exceptions.ConnectionError as err:
             raise TendaConnectionError(
@@ -121,7 +124,7 @@ class Auth:
         try:
             self._session.get(
                 url,
-                timeout=10,
+                timeout=4,
             )
         finally:
             self._session.cookies.clear()

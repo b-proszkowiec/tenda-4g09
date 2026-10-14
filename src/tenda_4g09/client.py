@@ -72,9 +72,6 @@ class Tenda4G09:
     ) -> Any:
         """Send a request to the router."""
 
-        if not self.logged_in:
-            self.login()
-
         response = self._session.request(
             method,
             f"http://{self.host}{path}",
@@ -82,7 +79,15 @@ class Tenda4G09:
             **kwargs,
         )
         response.raise_for_status()
-
+        html = response.text
+        if (
+            'Tenda Web Master' in html
+            or 'name="description" content="login"' in html
+            or 'class="login-body"' in html
+        ):
+            self.auth.logged_out()
+            raise RuntimeError("Login required")
+        
         return response.json()
 
     def get_status(self) -> RouterStatus:
