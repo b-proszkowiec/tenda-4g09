@@ -7,8 +7,9 @@ A lightweight Python library for interacting with the Tenda 4G09 LTE router thro
 - Router authentication and session management
 - Retrieving router status and Wi-Fi information
 - Reading SIM and WAN configuration
-- Recognizing whether the mobile WAN connection is active
-- Requesting the mobile WAN reconnect
+- Detecting whether the mobile WAN connection is active
+- Requesting a mobile WAN reconnection
+- Retrieving serving cell information from the modem
 
 ## Requirements
 
@@ -24,6 +25,8 @@ pip install tenda-4g09-client
 ```
 
 ## Quick start
+
+Collecting basic information.
 
 ```python
 from tenda_4g09 import Tenda4G09
@@ -75,7 +78,9 @@ Client: DESKTOP-AT2M0OR (192.168.0.49)
 
 Replace the IP address and password with your router's settings.
 
-## LTE reconnect
+## The mobile WAN reconnect
+
+Check whether the router has lost its mobile WAN connection and try to reconnect.
 
 ```python
 with Tenda4G09(URL, password) as router:
@@ -98,6 +103,41 @@ Before:
 
 After:
         Mobile data connected: True
+```
+
+## Getting the signal information from the modem
+
+Retrieve the parameters of the serving cell connection (equivalent AT command: AT+QENG="servingcell").
+
+```python
+with Tenda4G09(URL, password) as router:
+    client = router.get_telnet_client(router.host_ip)
+    print(client.get_signal_info())
+```
+
+#### output:
+
+```
+========== LTE SERVING CELL ==========
+Connection state : NOCONN
+Technology       : LTE (FDD)
+MCC / MNC        : 260 / 02
+Cell ID          : 0x###2512 (HEX), ###67602 (DEC)
+PCI              : 334
+TAC              : 0x##af (HEX), ##911 (DEC)
+LTE band         : B20
+EARFCN           : 6375
+UL bandwidth     : 15 MHz
+DL bandwidth     : 15 MHz
+--------------------------------------
+RSRP             : -105 dBm
+RSRQ             :  -13 dB
+RSSI             :  -72 dBm
+SINR             : 11.0 dB
+CQI              : 255
+TX power         : 170 (raw value)
+SRXLEV           : -
+======================================
 ```
 
 ## Compatibility
