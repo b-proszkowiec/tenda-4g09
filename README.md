@@ -7,8 +7,8 @@ A lightweight Python library for interacting with the Tenda 4G09 LTE router thro
 - Router authentication and session management
 - Retrieving router status and Wi-Fi information
 - Reading SIM and WAN configuration
-- Checking LTE connectivity
-- Initiating an LTE connection
+- Recognizing whether the mobile WAN connection is active
+- Requesting the mobile WAN reconnect
 
 ## Requirements
 
@@ -75,13 +75,29 @@ Client: DESKTOP-AT2M0OR (192.168.0.49)
 
 Replace the IP address and password with your router's settings.
 
-## LTE connection
+## LTE reconnect
 
 ```python
-with Tenda4G09("192.168.0.1", password="your-password") as router:
+with Tenda4G09(URL, password) as router:
+
+    print(f"Before:\n\tMobile data connected: {router.is_mobile_data_connected()}\n")
 
     if not router.is_mobile_data_connected():
         router.mobile_data_connect()
+
+    time.sleep(2)
+
+    print(f"After:\n\tMobile data connected: {router.is_mobile_data_connected()}")
+```
+
+#### output:
+
+```
+Before:
+        Mobile data connected: False
+
+After:
+        Mobile data connected: True
 ```
 
 ## Compatibility
