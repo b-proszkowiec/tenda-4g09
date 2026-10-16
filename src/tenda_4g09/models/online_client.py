@@ -34,3 +34,13 @@ class OnlineClient:
             blocked=bool(data["black"]),
             guest=data["isGuestClient"] == "true",
         )
+
+    def __str__(self) -> str:
+        return (
+            f"Client: {self.name} ({self.ip})\n"
+            f"  Device ID: {self.device_id}\n"
+            f"  Upload: {self.upload_speed:.2f} kB/s\n"
+            f"  Download: {self.download_speed:.2f} kB/s\n"
+            f"  Blocked: {'Yes' if self.blocked else 'No'}\n"
+            f"  Guest: {'Yes' if self.guest else 'No'}"
+        )
