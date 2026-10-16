@@ -16,6 +16,8 @@ from .system_status import (
     SystemWanInfo,
 )
 from .data_limit_setting import DataLimitSetting
+from .modem import *
+from .modem import __all__ as _modem_all
 
 __all__ = [
     "OnlineClient",
@@ -30,5 +32,6 @@ __all__ = [
     "SystemSimInfo",
     "SystemStatus",
     "SystemWanInfo",
-    "DataLimitSetting"
+    "DataLimitSetting",
+    *_modem_all,
 ]

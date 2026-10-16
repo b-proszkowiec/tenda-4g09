@@ -18,6 +18,7 @@ from .models import (
     SystemStatus,
     DataLimitSetting
 )
+from .telnet import TelnetClient
 
 
 class Tenda4G09:
@@ -25,18 +26,19 @@ class Tenda4G09:
 
     def __init__(
         self,
-        host: str,        
+        host_address: str,        
         password: str,
         username: str = "admin",
     ) -> None:
         """Initialize the client."""
 
-        self.host = host.rstrip("/")
+        self._host_ip = None
         self._session = requests.Session()
-        self._base_url = f"http://{host.rstrip('/')}"
+        self._base_url = f"http://{host_address.rstrip('/')}"
         self.username = username
         self.password = password
         
+        self._telnet_client: TelnetClient | None = None
 
         self.auth = Auth(
             session=self._session,
@@ -50,6 +52,7 @@ class Tenda4G09:
     def login(self) -> None:
         """Authenticate with the router."""
 
+        self.reset_stored()
         self.auth.login()
 
     def logout(self) -> None:
@@ -57,12 +60,31 @@ class Tenda4G09:
 
         self.auth.logout()
 
+    def reset_stored(self):
+        self._host_ip = None
+        self._telnet_client = None
+
+    @property
+    def host_ip(self) -> str:
+        """Return the target router ip."""
+
+        if self._host_ip is None:
+            self._host_ip = self.get_status().lan_ip
+        
+        return self._host_ip
+        
     @property
     def logged_in(self) -> bool:
         """Return whether the client is authenticated."""
 
         return self.auth.logged_in
 
+    def get_telnet_client(self, ip: str, port: int = 23) -> TelnetClient:
+
+        if self._telnet_client is None:
+            self._telnet_client = TelnetClient(ip, port, self.enable_telnet)
+        
+        return self._telnet_client
 
     def _request(
         self,
@@ -74,7 +96,7 @@ class Tenda4G09:
 
         response = self._session.request(
             method,
-            f"http://{self.host}{path}",
+            f"{self._base_url}{path}",
             timeout=10,
             **kwargs,
         )
@@ -97,8 +119,9 @@ class Tenda4G09:
             "GET",
             "/goform/GetRouterStatus",
         )
-
-        return RouterStatus.from_dict(data)
+        status = RouterStatus.from_dict(data)
+        self._host_ip = status.lan_ip
+        return status
 
     def get_sim_wan_info(self) -> SimWanInfo:
         """Get SIM WAN configuration."""
@@ -171,6 +194,22 @@ class Tenda4G09:
 
         return DataLimitSetting.from_dict(data)
 
+    def enable_telnet(self) -> bool:
+        url = f"{self._base_url}/goform/telnet"
+        message = ""
+
+        try:
+            response = self._session.get(
+                url,
+                timeout=3,
+            )
+            message = response.text
+
+        except requests.exceptions.ConnectionError as exc:
+            message = str(exc)
+
+        return "load telnetd success." in message
+
     def is_mobile_data_connected(self, status: RouterStatus | None = None) -> bool:
         """Whether the mobile WAN connection is active."""
 
@@ -217,7 +256,7 @@ class Tenda4G09:
             data = { 
                 "mobileData": int(swi.mobile_data),
                 "dataRoaming": int(swi.data_roaming),
-                "dataOptions": swi.data_options,
+                "dataOptions": swi.data_options.value,
                 "profileIndex": swi.profile_index,
                 "pdpType": sp.pdp_type,
                 "apn": sp.apn,
