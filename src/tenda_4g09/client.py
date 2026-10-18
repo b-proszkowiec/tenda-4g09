@@ -103,7 +103,7 @@ class Tenda4G09:
         response = self._session.request(
             method,
             f"{self._base_url}{path}",
-            timeout=10,
+            timeout=2,
             **kwargs,
         )
         response.raise_for_status()
@@ -207,7 +207,7 @@ class Tenda4G09:
         try:
             response = self._session.get(
                 url,
-                timeout=3,
+                timeout=2,
             )
             message = response.text
 
@@ -241,7 +241,7 @@ class Tenda4G09:
             "POST",
             f"{self._base_url}/goform/SysToolReboot",
             data = {"action": 0},
-            timeout=4
+            timeout=2
         )
         response.raise_for_status()
 
