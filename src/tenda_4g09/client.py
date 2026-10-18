@@ -216,7 +216,7 @@ class Tenda4G09:
         if status is None:
             status = self.get_status()
 
-        return status.sim_info.internet_status == 1
+        return status.sim_info.internet_status == ConnectionState.CONNECTED
 
     def mobile_data_connect(self) -> None:
         """Reconnect the mobile WAN connection."""
