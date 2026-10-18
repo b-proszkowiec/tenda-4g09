@@ -72,7 +72,13 @@ class Tenda4G09:
             self._host_ip = self.get_status().lan_ip
         
         return self._host_ip
-        
+
+    @property
+    def telnet_available(self) -> bool:
+        """Return whether the Telnet client is available."""
+
+        return self.get_telnet_client(self.host_ip).telnet_enabled
+
     @property
     def logged_in(self) -> bool:
         """Return whether the client is authenticated."""
