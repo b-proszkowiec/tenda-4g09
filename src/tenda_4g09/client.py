@@ -20,7 +20,7 @@ from .models import (
 )
 from .telnet import TelnetClient
 
-DEF_TIMEOUT=8
+HTTP_TIMEOUT = 8
 
 class Tenda4G09:
     """Client for Tenda 4G09 router."""
@@ -104,7 +104,7 @@ class Tenda4G09:
         response = self._session.request(
             method,
             f"{self._base_url}{path}",
-            timeout=DEF_TIMEOUT,
+            timeout=HTTP_TIMEOUT,
             **kwargs,
         )
         response.raise_for_status()
@@ -208,7 +208,7 @@ class Tenda4G09:
         try:
             response = self._session.get(
                 url,
-                timeout=DEF_TIMEOUT,
+                timeout=HTTP_TIMEOUT,
             )
             message = response.text
 
@@ -242,7 +242,7 @@ class Tenda4G09:
             "POST",
             f"{self._base_url}/goform/SysToolReboot",
             data = {"action": 0},
-            timeout=DEF_TIMEOUT
+            timeout=HTTP_TIMEOUT
         )
         response.raise_for_status()
 

@@ -17,7 +17,7 @@ def expected_prefix(command: str) -> str | None:
     match = _AT_PREFIX_RE.match(command.strip())
     return f"{match.group(1).upper()}:" if match else None
 
-TIMEOUT = 10
+WAIT_TIMEOUT = 6
 
 class TelnetATClient:
     def __init__(self, host: str, port: int = 23):
@@ -27,30 +27,30 @@ class TelnetATClient:
         self.reader = None
         self.writer = None
 
-    async def connect_and_login(self, login: str, password: str, timeout: int = TIMEOUT):
+    async def connect_and_login(self, login: str, password: str, timeout: int = 2):
         self.reader, self.writer = await telnetlib3.open_connection(
             host=self.host,
             port=self.port,
             connect_minwait=0.1,
-            connect_maxwait=TIMEOUT,
+            connect_maxwait=timeout,
         )
 
         try:
-            await asyncio.wait_for(self.reader.readuntil(b"login: "), timeout=TIMEOUT)
+            await asyncio.wait_for(self.reader.readuntil(b"login: "), timeout=WAIT_TIMEOUT)
             self.writer.write(login + "\n")
             await self.writer.drain()
 
-            await asyncio.wait_for(self.reader.readuntil(b"Password: "), timeout=TIMEOUT)
+            await asyncio.wait_for(self.reader.readuntil(b"Password: "), timeout=WAIT_TIMEOUT)
             self.writer.write(password + "\n")
             await self.writer.drain()
 
             separator = b"~ #"
-            await asyncio.wait_for(self.reader.readuntil(separator), timeout=TIMEOUT)
+            await asyncio.wait_for(self.reader.readuntil(separator), timeout=WAIT_TIMEOUT)
         except Exception as e:
             await self.close()
             raise ConnectionError(f"Failed to login or reach shell: {e}") from e
 
-    async def execute_at(self, command: str, at_timeout: float = TIMEOUT) -> str:
+    async def execute_at(self, command: str, at_timeout: float = WAIT_TIMEOUT) -> str:
         if not self.reader or not self.writer:
             raise RuntimeError("Not connected. Call connect_and_login first.")
 
